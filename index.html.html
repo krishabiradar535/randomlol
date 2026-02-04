@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stats Finder ✨</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ffc0cb 0%, #ffb6c1 100%);
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 8px 32px rgba(255, 105, 180, 0.3);
+            backdrop-filter: blur(10px);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #d1477a;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5);
+        }
+
+        .button-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+            position: relative;
+            height: 60px;
+        }
+
+        button {
+            padding: 15px 40px;
+            font-size: 1.3em;
+            font-family: 'Comic Sans MS', cursive;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .yes-btn {
+            background: #ff69b4;
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
+        }
+
+        .yes-btn:hover {
+            background: #ff1493;
+            transform: scale(1.05);
+        }
+
+        .no-btn {
+            background: #ffc0cb;
+            color: #d1477a;
+            box-shadow: 0 4px 15px rgba(255, 192, 203, 0.4);
+            position: absolute;
+            transition: all 0.15s ease-out;
+        }
+
+        .stats-container {
+            display: none;
+        }
+
+        .stats-container.active {
+            display: block;
+        }
+
+        .question-btn {
+            background: #ff69b4;
+            color: white;
+            margin: 15px 0;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.4);
+        }
+
+        .question-btn:hover {
+            background: #ff1493;
+            transform: scale(1.02);
+        }
+
+        .question-btn:disabled {
+            background: #ffb6c1;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 15px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .calculating {
+            color: #d1477a;
+            font-size: 1.2em;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .stat-result {
+            color: #d1477a;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .bar-container {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            height: 30px;
+            margin-top: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            background: linear-gradient(90deg, #ff69b4, #ff1493);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .error-margin {
+            color: #d1477a;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="initialScreen">
+            <h1>wanna find out some stats? 💕</h1>
+            <div class="button-container">
+                <button class="yes-btn" onclick="showStats()">yes</button>
+                <button class="no-btn" id="noBtn" onmouseover="moveButton()" ontouchstart="moveButton()">no</button>
+            </div>
+        </div>
+
+        <div class="stats-container" id="statsScreen">
+            <h1>let's calculate! ✨</h1>
+            
+            <button class="question-btn" onclick="calculateStat(1, 'How hot are you')">
+                how hot are you 🔥
+            </button>
+            <div id="result1" class="result hidden"></div>
+
+            <button class="question-btn" onclick="calculateStat(2, 'How likely are you to become lead/isaa')">
+                how likely are you to become lead/isaa 👑
+            </button>
+            <div id="result2" class="result hidden"></div>
+
+            <button class="question-btn" onclick="calculateStat(3, 'How smart are you')">
+                how smart are you 🧠
+            </button>
+            <div id="result3" class="result hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        function moveButton() {
+            const noBtn = document.getElementById('noBtn');
+            const container = document.querySelector('.button-container');
+            const containerRect = container.getBoundingClientRect();
+            
+            const maxX = containerRect.width - noBtn.offsetWidth;
+            const maxY = containerRect.height - noBtn.offsetHeight;
+            
+            const randomX = Math.random() * maxX;
+            const randomY = Math.random() * maxY;
+            
+            noBtn.style.left = randomX + 'px';
+            noBtn.style.top = randomY + 'px';
+        }
+
+        function showStats() {
+            document.getElementById('initialScreen').style.display = 'none';
+            document.getElementById('statsScreen').classList.add('active');
+        }
+
+        let answeredQuestions = new Set();
+
+        function calculateStat(questionNum, questionText) {
+            if (answeredQuestions.has(questionNum)) return;
+            
+            answeredQuestions.add(questionNum);
+            const resultDiv = document.getElementById('result' + questionNum);
+            const buttons = document.querySelectorAll('.question-btn');
+            buttons.forEach(btn => btn.disabled = true);
+            
+            resultDiv.classList.remove('hidden');
+            resultDiv.innerHTML = '<div class="calculating">calculating... 🌸</div>';
+            
+            setTimeout(() => {
+                let percentage;
+                let errorMargin = '';
+                
+                if (questionNum === 2) {
+                    percentage = 100.00;
+                    errorMargin = '<div class="error-margin">error margin: ± 0%</div>';
+                } else {
+                    percentage = (98 + Math.random() * 2).toFixed(2);
+                }
+                
+                resultDiv.innerHTML = `
+                    <div class="stat-result">${percentage}%</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: ${percentage}%">${percentage}%</div>
+                    </div>
+                    ${errorMargin}
+                `;
+                
+                buttons.forEach(btn => btn.disabled = false);
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
